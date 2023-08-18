@@ -1,0 +1,27 @@
+alias: "HVAC on when PM2.5 level is high"
+description: "This automation sets the HVAC main fan to "circulate" when PM 2.5 is above 30 ppm
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.ground_floor_pm25
+    above: 30
+condition:
+  - condition: state
+    entity_id: light.attic_fan
+    state: "off"
+action:
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: Circulation
+    target:
+      entity_id: climate.main_thermostat
+  - wait_for_trigger:
+      - platform: numeric_state
+        entity_id: sensor.ground_floor_pm25
+        below: 25
+    continue_on_timeout: false
+  - service: climate.set_fan_mode
+    data:
+      fan_mode: Auto Low
+    target:
+      entity_id: climate.main_thermostat
+mode: single
